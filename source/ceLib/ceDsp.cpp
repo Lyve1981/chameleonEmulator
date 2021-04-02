@@ -72,7 +72,7 @@ namespace ceLib
 	void Dsp::process(float* _inputs, float* _outputs)
 	{
 		Guard g(m_lock);
-		m_peripherals->process(_inputs, _outputs);
+		m_peripherals->process(m_dsp->getEssi(), _inputs, _outputs);
 	}
 
 	bool Dsp::createDSP()
@@ -80,6 +80,8 @@ namespace ceLib
 		m_peripherals.reset(new DspPeripherals());
 		m_memory.reset(new dsp56k::Memory(m_peripherals.get(), m_peripherals.get(), this, g_memorySize));
 		m_dsp.reset(new dsp56k::DSP(*m_memory));
+
+		m_peripherals->initialize(*m_dsp);
 
 		return true;
 	}
