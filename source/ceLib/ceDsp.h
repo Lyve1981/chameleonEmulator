@@ -14,6 +14,8 @@ namespace ceLib
 	class Dsp : dsp56k::IMemoryMap
 	{
 	public:
+		using Guard = std::lock_guard<std::mutex>;
+
 		Dsp();
 
 		int create(int _dspIndex, const uint8_t* _code);
@@ -30,8 +32,6 @@ namespace ceLib
 		bool memValidateAccess	(dsp56k::EMemArea _area, dsp56k::TWord _addr, bool _write ) const override ;
 
 		void threadFunc();
-
-		using Guard = std::lock_guard<std::mutex>;
 
 		std::unique_ptr<DspPeripherals> m_peripherals;
 		std::unique_ptr<dsp56k::Memory> m_memory;

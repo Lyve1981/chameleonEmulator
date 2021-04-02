@@ -71,8 +71,7 @@ namespace ceLib
 
 	void Dsp::process(float* _inputs, float* _outputs)
 	{
-		Guard g(m_lock);
-		m_peripherals->process(m_dsp->getEssi(), _inputs, _outputs);
+		m_peripherals->process(m_lock, _inputs, _outputs);
 	}
 
 	bool Dsp::createDSP()
