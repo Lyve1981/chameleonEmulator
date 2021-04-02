@@ -16,6 +16,7 @@ add_subdirectory(source/pluginVST2)
 add_subdirectory(source/vstsdk2.4.2)
 add_subdirectory(source/ceLib)
 add_subdirectory(source/cExamples/dspthru)
+add_subdirectory(source/dsp56300/source)
 
 # ----------------- plugins
 

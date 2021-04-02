@@ -14,3 +14,4 @@ source_group("source" FILES ${SOURCES})
 target_include_directories(ceLib PRIVATE ../../tools/Chameleon.sdk/include/rtems)
 target_include_directories(ceLib PRIVATE ../../tools/Chameleon.sdk/include/chameleon)
 
+target_link_libraries(ceLib PUBLIC dsp56kEmu)
