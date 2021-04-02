@@ -18,7 +18,7 @@ MyVSTAudioEffect::MyVSTAudioEffect (audioMasterCallback audioMaster)
 	setNumInputs  (2);					// stereo in
 	setNumOutputs (2);					// stereo out
 
-	setUniqueID   ('nChe');				// identify
+	setUniqueID   ('nChE');				// identify
 	canProcessReplacing ();				// supports replacing output
 
 	isSynth();
@@ -40,12 +40,13 @@ MyVSTAudioEffect::~MyVSTAudioEffect()
 //-----------------------------------------------------------------------------------------
 void MyVSTAudioEffect::setParameter (VstInt32 index, float value)
 {
+	m_plugin.setParameter(index, value);
 }
 
 //-----------------------------------------------------------------------------------------
 float MyVSTAudioEffect::getParameter (VstInt32 index)
 {
-	return 0.0f;
+	return m_plugin.getParameter(index);
 }
 
 //-----------------------------------------------------------------------------------------
@@ -104,6 +105,7 @@ VstPlugCategory MyVSTAudioEffect::getPlugCategory()
 //-----------------------------------------------------------------------------------------
 void MyVSTAudioEffect::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames)
 {
+	m_plugin.process(inputs, outputs, sampleFrames);
 }
 
 // _____________________________________________________________________________
