@@ -15,7 +15,7 @@ MyVSTAudioEffect::MyVSTAudioEffect (audioMasterCallback audioMaster)
 {
 	TRACE( "Initializing plugin");
 
-	setNumInputs  (0);					// no input
+	setNumInputs  (2);					// stereo in
 	setNumOutputs (2);					// stereo out
 
 	setUniqueID   ('nChe');				// identify
