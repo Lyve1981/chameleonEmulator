@@ -4,6 +4,9 @@ project(ceLib)
 add_library(ceLib STATIC)
 
 set(SOURCES
+	ceDsp.cpp ceDsp.h
+	ceMidi.cpp ceMidi.h
+	cePanel.cpp cePanel.h
 	cePlugin.cpp cePlugin.h
 	ceRtems.cpp ceRtems.h
 )
