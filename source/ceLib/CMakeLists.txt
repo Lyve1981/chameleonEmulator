@@ -5,12 +5,13 @@ add_library(ceLib STATIC)
 
 set(SOURCES
 	ceDsp.cpp ceDsp.h
+	ceDspPeripherals.cpp ceDspPeripherals.h
 	ceMidi.cpp ceMidi.h
 	cePanel.cpp cePanel.h
 	cePlugin.cpp cePlugin.h
 	ceRtems.cpp ceRtems.h
 )
-	
+
 target_sources(ceLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
