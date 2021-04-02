@@ -14,14 +14,8 @@ add_definitions("-DDEBUG")
 # libraries
 add_subdirectory(source/pluginVST2)
 add_subdirectory(source/vstsdk2.4.2)
-
-# ----------------- chameleon examples
-
-set(DSPTHRU_DIR tools/Chameleon.sdk/src/examples/dspthru)
-add_library(ch_example_dspthru STATIC ${DSPTHRU_DIR}/main.c ${DSPTHRU_DIR}/dsp/dsp_dma.h ${DSPTHRU_DIR}/dsp/dsp_interrupt.h ${DSPTHRU_DIR}/dsp/dsp_polling.h)
-
-target_include_directories(ch_example_dspthru PRIVATE tools/Chameleon.sdk/include/rtems)
-target_include_directories(ch_example_dspthru PRIVATE tools/Chameleon.sdk/include/chameleon)
+add_subdirectory(source/ceLib)
+add_subdirectory(source/cExamples/dspthru)
 
 # ----------------- plugins
 
@@ -37,7 +31,7 @@ endif()
 
 target_include_directories(chameleonEmuVST2 PRIVATE source/vstsdk2.4.2/)
 
-target_link_libraries(chameleonEmuVST2 cePluginVST2 ch_example_dspthru)
+target_link_libraries(chameleonEmuVST2 cePluginVST2 cExampleDspthru)
 
 if(APPLE OR UNIX)
 	target_link_libraries(chameleonEmuVST2 ${OS_LINK_LIBRARIES})

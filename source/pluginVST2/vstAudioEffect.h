@@ -4,6 +4,8 @@
 
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 
+#include "../ceLib/cePlugin.h"
+
 class k1ui;
 
 class MyVSTAudioEffect : public AudioEffectX
@@ -48,5 +50,6 @@ public:
 private:
 //	void			sendMidiEventsToHost		(const std::vector<k1lib::SMidiEvent>& _midiEvents);
 
+	ceLib::Plugin								m_plugin;
 	std::vector<unsigned char>					m_chunkData;
 };
