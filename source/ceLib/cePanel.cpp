@@ -15,7 +15,7 @@ extern "C"
 
 	int panel_init(void)
 	{
-		return 0;
+		return 1;
 	}
 	rtems_boolean panel_exit(int ref)
 	{
@@ -43,7 +43,7 @@ extern "C"
 
 	rtems_boolean panel_in_new_event(int ref, rtems_boolean wait)
 	{
-		return false;
+		return true;
 	}
 	rtems_boolean panel_in_potentiometer(int ref, rtems_unsigned8 *potentiometer, rtems_unsigned8 *value)
 	{
