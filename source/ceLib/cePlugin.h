@@ -14,6 +14,11 @@ namespace ceLib
 		Plugin();
 		virtual ~Plugin() = default;
 
+		void process(float** _inputs, float** _outputs, size_t _sampleFrames);
+
+		float getParameter(size_t _index);
+		void setParameter(size_t _index, float _value);
+
 		static Plugin& getCurrentPlugin();
 
 		Rtems& getRtems()		{ return m_rtems; }

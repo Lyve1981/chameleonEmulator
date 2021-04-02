@@ -15,4 +15,8 @@ namespace ceLib
 	void DspPeripherals::write(dsp56k::TWord _addr, dsp56k::TWord _value)
 	{
 	}
+
+	void DspPeripherals::process(float* _inputs, float* _outputs)
+	{
+	}
 }

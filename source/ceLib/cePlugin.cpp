@@ -17,11 +17,37 @@ namespace ceLib
 
 	Plugin::Plugin()
 	{
-		std::lock_guard<std::mutex> lock(g_lockCurrentPlugin);
+		Guard lock(g_lockCurrentPlugin);
 		// This is needed to make multiple instances work
 		g_currentPlugin = this;
 		rtems_main(0);
 		g_currentPlugin = nullptr;
+	}
+
+	void Plugin::process(float** _inputs, float** _outputs, size_t _sampleFrames)
+	{
+		for(size_t i=0; i<_sampleFrames; ++i)
+		{
+			float inputs[2] = {_inputs[0][i], _inputs[1][i]};
+			float outputs[2] = {0,0};
+
+			{
+				Guard g(m_mutex);
+				m_dsp.process(inputs, outputs);
+			}
+
+			_outputs[0][i] = outputs[0];
+			_outputs[1][i] = outputs[1];
+		}
+	}
+
+	float Plugin::getParameter(size_t _index)
+	{
+		return 0.0f;
+	}
+
+	void Plugin::setParameter(size_t _index, float _value)
+	{
 	}
 
 	Plugin& Plugin::getCurrentPlugin()
