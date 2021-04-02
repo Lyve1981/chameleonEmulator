@@ -5,7 +5,7 @@ IF %ERRORLEVEL% NEQ 0 (
 	exit /B 2
 )
 pushd %outdir%
-cmake --build . --config Release
+cmake --build . --config Debug
 IF %ERRORLEVEL% NEQ 0 (
 	popd 
 	exit /B 2
