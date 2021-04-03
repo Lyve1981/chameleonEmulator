@@ -43,11 +43,12 @@ namespace ceLib
 
 	float Plugin::getParameter(size_t _index)
 	{
-		return 0.0f;
+		return m_panel.getParameter(_index);
 	}
 
 	void Plugin::setParameter(size_t _index, float _value)
 	{
+		m_panel.setParameter(_index, _value);
 	}
 
 	Plugin& Plugin::getCurrentPlugin()

@@ -113,6 +113,8 @@ namespace ceLib
 
 	Plugin& Rtems::findInstance()
 	{
+		Guard g(g_lock);
+
 		const auto it = g_threadToTask.find(std::this_thread::get_id());
 
 		if(it != g_threadToTask.end())

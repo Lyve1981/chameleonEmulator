@@ -11,7 +11,7 @@ AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 
 //-------------------------------------------------------------------------------------------------------
 MyVSTAudioEffect::MyVSTAudioEffect (audioMasterCallback audioMaster)
-: AudioEffectX		(audioMaster, 1, 1)	// 1 program, 1 parameter
+: AudioEffectX		(audioMaster, 1, ceLib::Panel::getParameterCount())	// x programs, y parameters
 {
 	TRACE( "Initializing plugin");
 
@@ -52,19 +52,22 @@ float MyVSTAudioEffect::getParameter (VstInt32 index)
 //-----------------------------------------------------------------------------------------
 void MyVSTAudioEffect::getParameterName (VstInt32 index, char* label)
 {
-	vst_strncpy (label, "Gain", kVstMaxParamStrLen);
+	vst_strncpy (label, ceLib::Panel::getParameterName(index), kVstMaxParamStrLen);
 }
 
 //-----------------------------------------------------------------------------------------
 void MyVSTAudioEffect::getParameterDisplay (VstInt32 index, char* text)
 {
-	vst_strncpy( text, "0", kVstMaxParamStrLen );
+	char temp[64];
+	sprintf(temp, "%.2f", m_plugin.getParameter(index));
+
+	vst_strncpy( text, temp, kVstMaxParamStrLen);
 }
 
 //-----------------------------------------------------------------------------------------
 void MyVSTAudioEffect::getParameterLabel (VstInt32 index, char* label)
 {
-	vst_strncpy (label, "GainLbl", kVstMaxParamStrLen);
+	vst_strncpy (label, ceLib::Panel::getParameterName(index), kVstMaxParamStrLen);
 }
 
 //------------------------------------------------------------------------
