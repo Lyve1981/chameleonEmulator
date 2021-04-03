@@ -66,7 +66,8 @@ namespace ceLib
 	bool Dsp::writeData(int _ref, const int32_t* _data, size_t _count)
 	{
 		Guard g(m_lock);
-		return false;
+		m_peripherals->writeData(_data, _count);
+		return true;
 	}
 
 	void Dsp::process(float* _inputs, float* _outputs)

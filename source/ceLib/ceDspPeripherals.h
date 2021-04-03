@@ -1,5 +1,7 @@
 #pragma once
 
+#include <list>
+
 #include "../dsp56300/source/dsp56kEmu/peripherals.h"
 
 namespace std
@@ -20,12 +22,14 @@ namespace ceLib
 	public:
 		void initialize(dsp56k::DSP& _dsp);
 		void process(std::mutex& _dspLock, float* _inputs, float* _outputs);
+		void writeData(const int32_t* _data, size_t _count);
 
-		private:
+	private:
 		bool isValidAddress( dsp56k::TWord _addr ) const override;
 		dsp56k::TWord read(dsp56k::TWord _addr) override;
 		void write(dsp56k::TWord _addr, dsp56k::TWord _value) override;
-	private:
+
 		dsp56k::DSP* m_dsp = nullptr;
+		std::list<int32_t> m_hi8data;
 	};
 }

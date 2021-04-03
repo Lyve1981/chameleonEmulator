@@ -10,6 +10,7 @@ set(SOURCES
 	cePanel.cpp cePanel.h
 	cePlugin.cpp cePlugin.h
 	ceRtems.cpp ceRtems.h
+	semaphore.h
 )
 
 target_sources(ceLib PRIVATE ${SOURCES})

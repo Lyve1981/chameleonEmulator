@@ -8,6 +8,10 @@
 
 namespace ceLib
 {
+	constexpr uint32_t HSR_HRDF = 0;			// Host Status Register Bit: Receive Data Full
+	constexpr uint32_t HSR		= 0xFFFFC3;		// Host Status Register (HSR)
+	constexpr uint32_t HRX		= 0xFFFFC6;		// Host Receive Register (HRX)
+
 	bool DspPeripherals::isValidAddress(dsp56k::TWord _addr) const
 	{
 		return PeripheralsDefault::isValidAddress(_addr);
@@ -15,13 +19,23 @@ namespace ceLib
 
 	dsp56k::TWord DspPeripherals::read(dsp56k::TWord _addr)
 	{
-          // HACK: inject max volume
-		if(_addr == 0xFFFFC3)
-		    return 0xffffff;
-		if(_addr == 0xffffc6)
-		    return 0x7fffff;
+		if(_addr == HRX)	// Host Receive Register (HRX)
+		{
+			if(m_hi8data.empty())
+				return PeripheralsDefault::read(_addr);
 
-		const dsp56k::TWord res = PeripheralsDefault::read(_addr);
+			const auto res = m_hi8data.front();
+			write(HRX, res);
+
+			m_hi8data.pop_front();
+
+			if(m_hi8data.empty())
+				write(HSR, read(HSR) & ~(1<<HSR_HRDF));	// Clear "Receive Data Full" bit
+
+			return res;
+		}
+
+		const auto res = PeripheralsDefault::read(_addr);
 
 		if(_addr == dsp56k::Essi::ESSI0_RX)
 		{
@@ -109,5 +123,16 @@ namespace ceLib
 				essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_TDE, 1);
 			}
 		}
+	}
+
+	void DspPeripherals::writeData(const int32_t* _data, size_t _count)
+	{
+		if(_count == 0)
+			return;
+
+		for(size_t i=0; i<_count; ++i)
+			m_hi8data.push_back(_data[i] & 0x00ffffff);
+
+		write(HSR, read(HSR) | (1<<HSR_HRDF));	// Set "Receive Data Full" bit
 	}
 }
