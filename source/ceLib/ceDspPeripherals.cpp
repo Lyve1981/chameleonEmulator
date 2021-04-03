@@ -65,15 +65,14 @@ namespace ceLib
 		{
 			// toggle frame sync to inform DSP which channel is being transmitted, 1 = left, 0 = right
 			{
-				const Dsp::Guard g(_dspLock);				
+//				const Dsp::Guard g(_dspLock);
 				essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RFS, 1 - c);
 			}
 		
 			// wait for receive register to be free
-			auto now = std::chrono::high_resolution_clock::now();
-			while((std::chrono::high_resolution_clock::now() - now) < std::chrono::milliseconds(1000))
+			for(size_t r=0; r<1000; ++r)
 			{
-				const Dsp::Guard g(_dspLock);
+//				const Dsp::Guard g(_dspLock);
 				const auto receiveFull = essi.testStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RDF);
 				if(!receiveFull)
 					break;
@@ -81,16 +80,15 @@ namespace ceLib
 
 			// write input to receive register
 			{
-				const Dsp::Guard g(_dspLock);
-				write(dsp56k::Essi::ESSI0_RX, float_to_fix(_inputs[c]));
+//				const Dsp::Guard g(_dspLock);
+				write(dsp56k::Essi::ESSI0_RX, float_to_fix(_inputs[c]) & 0xffffff);
 				essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RDF, 1);
 			}
 
 			// wait for transmit register to be full
-			now = std::chrono::high_resolution_clock::now();
-			while((std::chrono::high_resolution_clock::now() - now) < std::chrono::milliseconds(1000))
+			for(size_t r=0; r<1000; ++r)
 			{
-				const Dsp::Guard g(_dspLock);
+//				const Dsp::Guard g(_dspLock);
 				const auto transmitEmpty = essi.testStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_TDE);
 				if(!transmitEmpty)
 					break;
@@ -98,7 +96,7 @@ namespace ceLib
 
 			// read output register
 			{
-				const Dsp::Guard g(_dspLock);
+//				const Dsp::Guard g(_dspLock);
 				_outputs[c] = fix_to_float(read(dsp56k::Essi::ESSI0_TX0));
 				essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_TDE, 1);
 			}
