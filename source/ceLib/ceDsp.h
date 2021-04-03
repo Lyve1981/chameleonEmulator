@@ -17,7 +17,7 @@ namespace ceLib
 		using Guard = std::lock_guard<std::mutex>;
 
 		Dsp();
-		~Dsp();
+		virtual ~Dsp();
 
 		int create(int _dspIndex, const uint8_t* _code);
 		bool destroy(int _ref);
