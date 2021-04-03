@@ -14,9 +14,6 @@
 
 namespace ceLib
 {
-	static uint32_t g_nextTaskId = 1;
-	static std::mutex g_lock;
-
 	using Guard = std::lock_guard<std::mutex>;
 
 	struct Task
@@ -26,6 +23,9 @@ namespace ceLib
 
 		explicit Task(Plugin& _plugin) : plugin(_plugin) {}
 	};
+
+	static uint32_t g_nextTaskId = 1;
+	static std::mutex g_lock;
 
 	static std::map<uint32_t, std::unique_ptr<Task>> g_tasks;
 	static std::map<std::thread::id, uint32_t> g_threadToTask;
@@ -47,21 +47,21 @@ namespace ceLib
 		return RTEMS_SUCCESSFUL;
 	}
 
-	rtems_status_code Rtems::taskStart(rtems_id id, rtems_task_entry entry_point, unsigned32 argument)
+	rtems_status_code Rtems::taskStart(rtems_id _id, rtems_task_entry _entryPoint, unsigned32 _argument)
 	{
 		Guard g(g_lock);
 
-		const auto it = g_tasks.find(id);
+		const auto it = g_tasks.find(_id);
 		if(it == g_tasks.end())
 			return RTEMS_INVALID_ID;
 
 		auto* task = it->second.get();
-		task->thread.reset(new std::thread([entry_point, argument]
+		task->thread.reset(new std::thread([_entryPoint, _argument]
 		{
 			try
 			{
 				LOG("Thread starting");
-				entry_point(argument);
+				_entryPoint(_argument);
 			}
 			catch (const std::runtime_error& e)
 			{
@@ -69,14 +69,14 @@ namespace ceLib
 			}
 		}));
 
-		g_threadToTask.insert(std::make_pair(task->thread->get_id(), id));
+		g_threadToTask.insert(std::make_pair(task->thread->get_id(), _id));
 
 		return RTEMS_SUCCESSFUL;
 	}
 
-	rtems_status_code Rtems::taskDelete(rtems_id id)
+	rtems_status_code Rtems::taskDelete(rtems_id _id)
 	{
-		if(id == RTEMS_SELF)
+		if(_id == RTEMS_SELF)
 		{
 			const auto myId = std::this_thread::get_id();
 
@@ -86,18 +86,18 @@ namespace ceLib
 			{
 				if( task.second->thread->get_id() == myId)
 				{
-					id = task.first;
+					_id = task.first;
 					break;
 				}
 			}
 		}
 
-		if(id == RTEMS_SELF)
+		if(_id == RTEMS_SELF)
 			return RTEMS_ALREADY_SUSPENDED;
 
 		Guard g(g_lock);
 
-		const auto it = g_tasks.find(id);
+		const auto it = g_tasks.find(_id);
 		if(it == g_tasks.end())
 			return RTEMS_INVALID_ID;
 
@@ -108,7 +108,7 @@ namespace ceLib
 		// Note: There won't be an entry if the task was never started
 		for (auto it2 = g_threadToTask.begin(); it2 != g_threadToTask.end(); ++it2)
 		{
-			if(it2->second == id)
+			if(it2->second == _id)
 			{
 				g_threadToTask.erase(it2);
 				break;
