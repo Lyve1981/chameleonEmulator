@@ -12,7 +12,7 @@ namespace ceLib
 	{
 	public:
 		Plugin();
-		virtual ~Plugin() = default;
+		virtual ~Plugin();
 
 		void process(float** _inputs, float** _outputs, size_t _sampleFrames);
 

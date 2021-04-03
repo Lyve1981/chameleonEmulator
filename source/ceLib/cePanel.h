@@ -14,6 +14,8 @@ namespace ceLib
 	{
 	public:
 		Panel();
+
+		void destroy();
 		
 		static size_t getParameterCount();
 		static const char* getParameterName(size_t _index);
@@ -44,5 +46,6 @@ namespace ceLib
 		bool m_encoderChanged = true;
 
 		Semaphore m_changedEvent;
+		bool m_destroy = false;
 	};
 }

@@ -14,13 +14,20 @@ namespace ceLib
 	constexpr uint8_t g_cmdMemoryY	= 0x02;
 	constexpr uint8_t g_cmEnd		= 0x03;
 
+	constexpr uint32_t g_dspId		= 1;
+
 	Dsp::Dsp() : m_runThread(false)
 	{
+	}
+	Dsp::~Dsp()
+	{
+		destroyThread();
+		destroyDSP();
 	}
 
 	int Dsp::create(int _dspIndex, const uint8_t* _code)
 	{
-		if(_dspIndex != 1)
+		if(_dspIndex != g_dspId)
 			return 0;
 
 		Guard g(m_lock);
@@ -46,11 +53,8 @@ namespace ceLib
 		return _dspIndex;
 	}
 
-	bool Dsp::destroy(int _ref)
+	void Dsp::destroyThread()
 	{
-		if(_ref != 1)
-			return false;
-
 		if(m_runnerThread)
 		{
 			m_runThread = false;
@@ -58,6 +62,14 @@ namespace ceLib
 			Guard g(m_lock);
 			m_runnerThread->join();
 		}
+	}
+
+	bool Dsp::destroy(int _ref)
+	{
+		if(_ref != g_dspId)
+			return false;
+
+		destroyThread();
 
 		Guard g(m_lock);
 		return destroyDSP();

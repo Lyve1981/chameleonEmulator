@@ -15,6 +15,7 @@ namespace ceLib
 		static rtems_status_code taskCreate(rtems_name name, rtems_task_priority _initialPriority, rtems_unsigned32 _stackSize, rtems_mode _initialModes, rtems_attribute _attributeSet, rtems_id *_id);
 		static rtems_status_code taskStart(rtems_id id, rtems_task_entry entry_point, unsigned32 argument);
 		static rtems_status_code taskDelete(rtems_id id);
+		static void endThreads(Plugin* _plugin);
 
 		static Plugin& findInstance();
 	};

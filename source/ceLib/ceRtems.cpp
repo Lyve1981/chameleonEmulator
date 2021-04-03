@@ -56,9 +56,17 @@ namespace ceLib
 			return RTEMS_INVALID_ID;
 
 		auto* task = it->second.get();
-		task->thread.reset(new std::thread([&]
+		task->thread.reset(new std::thread([entry_point, argument]
 		{
-			entry_point(argument);
+			try
+			{
+				LOG("Thread starting");
+				entry_point(argument);
+			}
+			catch (const std::runtime_error& e)
+			{
+				LOG("Thread terminated: " << e.what());
+			}
 		}));
 
 		g_threadToTask.insert(std::make_pair(task->thread->get_id(), id));
@@ -68,7 +76,6 @@ namespace ceLib
 
 	rtems_status_code Rtems::taskDelete(rtems_id id)
 	{
-		// TODO: We need a native thread cancel as many threads are endless loops
 		if(id == RTEMS_SELF)
 		{
 			const auto myId = std::this_thread::get_id();
@@ -95,7 +102,7 @@ namespace ceLib
 			return RTEMS_INVALID_ID;
 
 		auto* t = it->second.get();
-		t->thread->detach();			// join would be better but if id == self this does not work.
+		t->thread->join();
 		g_tasks.erase(it);
 
 		// Note: There won't be an entry if the task was never started
@@ -109,6 +116,25 @@ namespace ceLib
 		}
 
 		return RTEMS_SUCCESSFUL;
+	}
+
+	void Rtems::endThreads(Plugin* _plugin)
+	{
+		std::list<rtems_id> tasksToEnd;
+		{
+			Guard g(g_lock);
+
+			for (auto& task : g_tasks)
+			{
+				auto& plug = task.second->plugin;
+
+				if(&plug == _plugin)
+					tasksToEnd.push_back(task.first);
+			}			
+		}
+
+		for (auto id : tasksToEnd)
+			rtems_task_delete(id);
 	}
 
 	Plugin& Rtems::findInstance()

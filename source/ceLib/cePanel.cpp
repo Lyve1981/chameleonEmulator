@@ -67,6 +67,14 @@ namespace ceLib
 		m_parameterValues.resize(g_paramCount, 0.0f);
 	}
 
+	void Panel::destroy()
+	{
+		m_destroy = true;
+
+		// thread wake-up
+		m_changedEvent.notify();
+	}
+
 	size_t Panel::getParameterCount()
 	{
 		return g_paramCount;
@@ -161,8 +169,14 @@ namespace ceLib
 
 	bool Panel::hasEvents(bool _wait)
 	{
+		if(m_destroy)
+			throw std::runtime_error("quit");
+
 		if(_wait)
 			m_changedEvent.wait();
+
+		if(m_destroy)
+			throw std::runtime_error("quit");
 
 		const bool hasEvents = m_potentiometersChanged != 0 || m_keysChanged || m_encoderChanged;
 

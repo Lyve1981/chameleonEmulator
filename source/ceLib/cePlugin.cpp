@@ -24,6 +24,12 @@ namespace ceLib
 		g_currentPlugin = nullptr;
 	}
 
+	Plugin::~Plugin()
+	{
+		m_panel.destroy();
+		Rtems::endThreads(this);
+	}
+
 	void Plugin::process(float** _inputs, float** _outputs, size_t _sampleFrames)
 	{
 		for(size_t i=0; i<_sampleFrames; ++i)

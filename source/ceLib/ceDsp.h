@@ -17,6 +17,7 @@ namespace ceLib
 		using Guard = std::lock_guard<std::mutex>;
 
 		Dsp();
+		~Dsp();
 
 		int create(int _dspIndex, const uint8_t* _code);
 		bool destroy(int _ref);
@@ -27,6 +28,8 @@ namespace ceLib
 		bool createDSP();
 		bool loadCode(const uint8_t* _code);
 		bool destroyDSP();
+
+		void destroyThread();
 
 		bool memTranslateAddress(dsp56k::EMemArea& _area, dsp56k::TWord& _offset ) const override;
 		bool memValidateAccess	(dsp56k::EMemArea _area, dsp56k::TWord _addr, bool _write ) const override ;
