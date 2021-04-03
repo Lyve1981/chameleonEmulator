@@ -35,15 +35,22 @@ namespace ceLib
 			return res;
 		}
 
-		const auto res = PeripheralsDefault::read(_addr);
-
 		if(_addr == dsp56k::Essi::ESSI0_RX)
 		{
 			assert(m_dsp);
 
-			// if DSP reads the receive register, clear "Receive Register Full" bit in ESSI SR
-			m_dsp->getEssi().toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RDF, 0);
+			std::lock_guard<std::mutex> g(m_lockRingBuffers);
+
+			if(m_audioInput.empty())
+				return 0;
+
+			const auto res = m_audioInput.front();
+			m_audioInput.pop_front();
+
+			return res;
 		}
+
+		const auto res = PeripheralsDefault::read(_addr);
 
 		return res;
 	}
@@ -56,9 +63,27 @@ namespace ceLib
 		{
 			assert(m_dsp);
 
-			// if DSP writes to transmit register, clear "Transmit Register Empty" bit in ESSI SR
-			m_dsp->getEssi().toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_TDE, 0);
+			std::lock_guard<std::mutex> g(m_lockRingBuffers);
+
+			m_audioOutput.push_back(_value);
 		}
+	}
+
+	void DspPeripherals::exec()
+	{
+		if(!m_dsp)
+			return;
+		
+		auto& essi = m_dsp->getEssi();
+
+		// set Receive Register Full flag if there is input
+		essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RDF, m_audioInput.empty() ? 0 : 1);
+
+		// set Transmit Register Empty flag if there is space left in the output
+		essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_TDE, m_audioOutput.full() ? 0 : 1);
+
+		// Toggle Frame Sync flag. We do not need it as we ensure proper channel ordering anyway, but the DSP needs it to sync to the left/right channel
+		essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RFS, (++m_frameSync)&1);
 	}
 
 	void DspPeripherals::initialize(dsp56k::DSP& _dsp)
@@ -77,50 +102,34 @@ namespace ceLib
 		essi.setControlRegisters(dsp56k::Essi::Essi0, cra, crb);
 	}
 
-	void DspPeripherals::process(std::mutex& _dspLock, float* _inputs, float* _outputs)
-	{	
+	void DspPeripherals::process(std::mutex& _dspLock, float** _inputs, float** _outputs, size_t _sampleFrames)
+	{
+		if(!_sampleFrames)
+			return;
+
 		auto& essi = m_dsp->getEssi();;
 
-		const auto waitCycles = 10000000;
-		
-		for(size_t c=0; c<2; ++c)
+		// write input data
+		for(size_t i=0; i<_sampleFrames; ++i)
 		{
-			// toggle frame sync to inform DSP which channel is being transmitted, 1 = left, 0 = right
+			for(size_t c=0; c<2; ++c)
 			{
-//				const Dsp::Guard g(_dspLock);
-				essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RFS, 1 - c);
+				m_audioInput.push_back(float_to_fix(_inputs[c][i]) & 0x00ffffff);
 			}
-		
-			// wait for receive register to be free
-			for(size_t r=0; r<waitCycles; ++r)
-			{
-//				const Dsp::Guard g(_dspLock);
-				const auto receiveFull = essi.testStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RDF);
-				if(!receiveFull)
-					break;
-			}
+		}
 
-			// write input to receive register
+		// read output
+		for(size_t i=0; i<_sampleFrames; ++i)
+		{
+			for(size_t c=0; c<2; ++c)
 			{
-//				const Dsp::Guard g(_dspLock);
-				write(dsp56k::Essi::ESSI0_RX, float_to_fix(_inputs[c]) & 0xffffff);
-				essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RDF, 1);
-			}
+				while(m_audioOutput.empty())
+					std::this_thread::yield();
 
-			// wait for transmit register to be full
-			for(size_t r=0; r<waitCycles; ++r)
-			{
-//				const Dsp::Guard g(_dspLock);
-				const auto transmitEmpty = essi.testStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_TDE);
-				if(!transmitEmpty)
-					break;
-			}
+				const auto v = m_audioOutput.front();
+				m_audioOutput.pop_front();
 
-			// read output register
-			{
-//				const Dsp::Guard g(_dspLock);
-				_outputs[c] = fix_to_float(read(dsp56k::Essi::ESSI0_TX0));
-				essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_TDE, 1);
+				_outputs[c][i] = fix_to_float(v);
 			}
 		}
 	}

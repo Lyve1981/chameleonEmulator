@@ -82,9 +82,10 @@ namespace ceLib
 		return true;
 	}
 
-	void Dsp::process(float* _inputs, float* _outputs)
+	void Dsp::process(float** _inputs, float** _outputs, size_t _sampleFrames)
 	{
-		m_peripherals->process(m_lock, _inputs, _outputs);
+		if(m_runnerThread)
+			m_peripherals->process(m_lock, _inputs, _outputs, _sampleFrames);
 	}
 
 	bool Dsp::createDSP()

@@ -32,19 +32,7 @@ namespace ceLib
 
 	void Plugin::process(float** _inputs, float** _outputs, size_t _sampleFrames)
 	{
-		for(size_t i=0; i<_sampleFrames; ++i)
-		{
-			float inputs[2] = {_inputs[0][i], _inputs[1][i]};
-			float outputs[2] = {0,0};
-
-			{
-				Guard g(m_mutex);
-				m_dsp.process(inputs, outputs);
-			}
-
-			_outputs[0][i] = outputs[0];
-			_outputs[1][i] = outputs[1];
-		}
+		m_dsp.process(_inputs, _outputs, _sampleFrames);
 	}
 
 	float Plugin::getParameter(size_t _index)

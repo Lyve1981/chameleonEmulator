@@ -22,7 +22,7 @@ namespace ceLib
 		int create(int _dspIndex, const uint8_t* _code);
 		bool destroy(int _ref);
 		bool writeData(int _ref, const int32_t* _data, size_t _count);
-		void process(float* _inputs, float* _outputs);
+		void process(float** _inputs, float** _outputs, size_t _sampleFrames);
 
 	private:
 		bool createDSP();
