@@ -152,6 +152,11 @@ namespace ceLib
 
 		return Plugin::getCurrentPlugin();
 	}
+
+	void Rtems::terminateEndlessLoop()
+	{
+		throw std::runtime_error("quit");
+	}
 }
 
 extern "C"

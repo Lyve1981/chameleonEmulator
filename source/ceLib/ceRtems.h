@@ -18,5 +18,6 @@ namespace ceLib
 		static void endThreads(Plugin* _plugin);
 
 		static Plugin& findInstance();
+		static void terminateEndlessLoop();
 	};
 }

@@ -170,13 +170,13 @@ namespace ceLib
 	bool Panel::hasEvents(bool _wait)
 	{
 		if(m_destroy)
-			throw std::runtime_error("quit");
+			Rtems::terminateEndlessLoop();
 
 		if(_wait)
 			m_changedEvent.wait();
 
 		if(m_destroy)
-			throw std::runtime_error("quit");
+			Rtems::terminateEndlessLoop();
 
 		const bool hasEvents = m_potentiometersChanged != 0 || m_keysChanged || m_encoderChanged;
 

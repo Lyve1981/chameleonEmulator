@@ -2,9 +2,7 @@
 
 #include <array>
 #include <cstdint>
-#include <panel01.h>
 #include <vector>
-
 
 #include "semaphore.h"
 
