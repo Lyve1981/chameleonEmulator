@@ -15,7 +15,13 @@ namespace ceLib
 
 	dsp56k::TWord DspPeripherals::read(dsp56k::TWord _addr)
 	{
-		const auto res = PeripheralsDefault::read(_addr);
+          // HACK: inject max volume
+		if(_addr == 0xFFFFC3)
+		    return 0xffffff;
+		if(_addr == 0xffffc6)
+		    return 0x7fffff;
+
+		const dsp56k::TWord res = PeripheralsDefault::read(_addr);
 
 		if(_addr == dsp56k::Essi::ESSI0_RX)
 		{
