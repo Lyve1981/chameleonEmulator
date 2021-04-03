@@ -36,12 +36,11 @@ namespace ceLib
 
 		dsp56k::DSP* m_dsp = nullptr;
 
-		RingBuffer<uint32_t,1024> m_hi8data;
+		RingBuffer<uint32_t, 1024> m_hi8data;
 
 		RingBuffer<uint32_t, 8192> m_audioInput;
 		RingBuffer<uint32_t, 8192> m_audioOutput;
 
-		std::mutex m_lockRingBuffers;
 		uint32_t m_frameSync = 0;
 	};
 }

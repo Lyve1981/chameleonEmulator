@@ -39,8 +39,6 @@ namespace ceLib
 		{
 			assert(m_dsp);
 
-			std::lock_guard<std::mutex> g(m_lockRingBuffers);
-
 			if(m_audioInput.empty())
 				return 0;
 
@@ -62,8 +60,6 @@ namespace ceLib
 		if(_addr == dsp56k::Essi::ESSI0_TX0)
 		{
 			assert(m_dsp);
-
-			std::lock_guard<std::mutex> g(m_lockRingBuffers);
 
 			m_audioOutput.push_back(_value);
 		}
