@@ -10,6 +10,7 @@ set(SOURCES
 	cePanel.cpp cePanel.h
 	cePlugin.cpp cePlugin.h
 	ceRtems.cpp ceRtems.h
+	ringbuffer.h
 	semaphore.h
 )
 
