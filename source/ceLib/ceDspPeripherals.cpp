@@ -67,6 +67,8 @@ namespace ceLib
 	{	
 		auto& essi = m_dsp->getEssi();;
 
+		const auto waitCycles = 10000000;
+		
 		for(size_t c=0; c<2; ++c)
 		{
 			// toggle frame sync to inform DSP which channel is being transmitted, 1 = left, 0 = right
@@ -76,7 +78,7 @@ namespace ceLib
 			}
 		
 			// wait for receive register to be free
-			for(size_t r=0; r<1000; ++r)
+			for(size_t r=0; r<waitCycles; ++r)
 			{
 //				const Dsp::Guard g(_dspLock);
 				const auto receiveFull = essi.testStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RDF);
@@ -92,7 +94,7 @@ namespace ceLib
 			}
 
 			// wait for transmit register to be full
-			for(size_t r=0; r<1000; ++r)
+			for(size_t r=0; r<waitCycles; ++r)
 			{
 //				const Dsp::Guard g(_dspLock);
 				const auto transmitEmpty = essi.testStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_TDE);
