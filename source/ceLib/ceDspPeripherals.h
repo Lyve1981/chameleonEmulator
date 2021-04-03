@@ -2,6 +2,8 @@
 
 #include <list>
 
+
+#include "ringbuffer.h"
 #include "../dsp56300/source/dsp56kEmu/peripherals.h"
 
 namespace std
@@ -30,6 +32,6 @@ namespace ceLib
 		void write(dsp56k::TWord _addr, dsp56k::TWord _value) override;
 
 		dsp56k::DSP* m_dsp = nullptr;
-		std::list<int32_t> m_hi8data;
+		RingBuffer<uint32_t,1024> m_hi8data;
 	};
 }

@@ -131,7 +131,12 @@ namespace ceLib
 			return;
 
 		for(size_t i=0; i<_count; ++i)
+		{
+			while(m_hi8data.full())
+				std::this_thread::yield();
+
 			m_hi8data.push_back(_data[i] & 0x00ffffff);
+		}
 
 		write(HSR, read(HSR) | (1<<HSR_HRDF));	// Set "Receive Data Full" bit
 	}
