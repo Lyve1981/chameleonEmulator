@@ -5,6 +5,8 @@
 #include "ceRtems.h"
 #include "cePlugin.h"
 
+#include <chrono>
+
 namespace ceLib
 {
 	constexpr size_t g_memorySize = 0x800000;
@@ -171,10 +173,34 @@ namespace ceLib
 			m_dsp->setPC(0x100);
 		}
 
+		size_t instructions = 0;
+
+		using clock = std::chrono::high_resolution_clock;
+
+		auto t = clock::now();
+
+		const size_t ipsStep = 0x400000;
+
 		while(m_runThread)
 		{
 			Guard g(m_lock);
 			m_dsp->exec();
+
+			++instructions;
+
+			if((instructions & (ipsStep-1)) == 0)
+			{
+				const auto t2 = clock::now();
+				const auto d = t2 - t;
+
+				const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(d);
+
+				const auto ips = ipsStep * 1000 / ms.count();
+
+				t = t2;
+
+				LOG("IPS: " << ips);
+			}
 		}
 	}
 }
