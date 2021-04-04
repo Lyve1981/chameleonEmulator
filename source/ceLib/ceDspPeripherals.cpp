@@ -9,8 +9,6 @@
 namespace ceLib
 {
 	constexpr uint32_t HSR_HRDF = 0;			// Host Status Register Bit: Receive Data Full
-	constexpr uint32_t HSR		= 0xFFFFC3;		// Host Status Register (HSR)
-	constexpr uint32_t HRX		= 0xFFFFC6;		// Host Receive Register (HRX)
 
 	bool DspPeripherals::isValidAddress(dsp56k::TWord _addr) const
 	{
@@ -19,18 +17,18 @@ namespace ceLib
 
 	dsp56k::TWord DspPeripherals::read(dsp56k::TWord _addr)
 	{
-		if(_addr == HRX)	// Host Receive Register (HRX)
+		if(_addr == dsp56k::HostIO_HRX)	// Host Receive Register (HRX)
 		{
 			if(m_hi8data.empty())
 				return PeripheralsDefault::read(_addr);
 
 			const auto res = m_hi8data.front();
-			write(HRX, res);
+			write(dsp56k::HostIO_HRX, res);
 
 			m_hi8data.pop_front();
 
 			if(m_hi8data.empty())
-				write(HSR, read(HSR) & ~(1<<HSR_HRDF));	// Clear "Receive Data Full" bit
+				write(dsp56k::HostIO_HSR, read(dsp56k::HostIO_HSR) & ~(1<<HSR_HRDF));	// Clear "Receive Data Full" bit
 
 			return res;
 		}
@@ -143,6 +141,6 @@ namespace ceLib
 			m_hi8data.push_back(_data[i] & 0x00ffffff);
 		}
 
-		write(HSR, read(HSR) | (1<<HSR_HRDF));	// Set "Receive Data Full" bit
+		write(dsp56k::HostIO_HSR, read(dsp56k::HostIO_HSR) | (1<<HSR_HRDF));	// Set "Receive Data Full" bit
 	}
 }
