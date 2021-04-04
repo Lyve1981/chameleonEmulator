@@ -1,11 +1,9 @@
 #pragma once
 
-#include <list>
 #include <mutex>
 
-
-
 #include "ringbuffer.h"
+
 #include "../dsp56300/source/dsp56kEmu/peripherals.h"
 
 namespace std

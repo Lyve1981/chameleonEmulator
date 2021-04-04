@@ -3,6 +3,7 @@
 #include <attr.h>
 #include <cassert>
 #include <cstdint>
+#include <list>
 #include <map>
 #include <modes.h>
 #include <mutex>
