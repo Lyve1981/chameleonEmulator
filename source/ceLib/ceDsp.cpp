@@ -185,10 +185,16 @@ namespace ceLib
 
 		while(m_runThread)
 		{
-			Guard g(m_lock);
-			m_dsp->exec();
+			{
+				Guard g(m_lock);
 
-			++instructions;
+				for(size_t i=0; i<64; ++i)
+				{
+					m_dsp->exec();
+
+					++instructions;
+				}
+			}
 
 			if((instructions & (ipsStep-1)) == 0)
 			{
