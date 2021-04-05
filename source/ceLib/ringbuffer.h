@@ -5,10 +5,12 @@
 #include <atomic>
 #include <cassert>
 
+#include "semaphore.h"
+
 template<typename T, size_t C> class RingBuffer
 {
 public:
-	RingBuffer() : m_insertPos(0), m_removePos(0), m_usage(0)
+	RingBuffer() : m_insertPos(0), m_removePos(0), m_usage(0), m_readSem(0), m_writeSem(C)
 	{
 	}
 
@@ -22,20 +24,31 @@ public:
 	{
 //		assert( m_usage < C && "ring buffer is already full!" );
 
+		m_writeSem.wait();
+
 		m_data[m_insertPos] = _val;
 		updateCounter(m_insertPos);
 
 		// usage need to be incremented AFTER data has been written, otherwise, reader thread would read incomplete data
 		++m_usage;
+
+		m_readSem.notify();
 	}
 
-	void pop_front()
+	T pop_front()
 	{
+		m_readSem.wait();
+
+		const T res = front();
 //		assert( m_usage > 0 && "ring buffer is already empty!" );
 
 		updateCounter(m_removePos);
 
 		--m_usage;
+
+		m_writeSem.notify();
+
+		return res;
 	}
 
 	void removeAt( size_t i )
@@ -106,6 +119,8 @@ private:
 	size_t				m_insertPos;
 	size_t				m_removePos;
 	std::atomic<size_t>	m_usage;
+	ceLib::Semaphore	m_readSem;
+	ceLib::Semaphore	m_writeSem;
 
 public:
 	static void test()
