@@ -31,7 +31,7 @@ namespace ceLib
 
 		void destroyThread();
 
-		bool memTranslateAddress(dsp56k::EMemArea& _area, dsp56k::TWord& _offset ) const override;
+		void memTranslateAddress(dsp56k::EMemArea& _area, dsp56k::TWord& _offset ) const override;
 		bool memValidateAccess	(dsp56k::EMemArea _area, dsp56k::TWord _addr, bool _write ) const override ;
 
 		void threadFunc();

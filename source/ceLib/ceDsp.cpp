@@ -153,14 +153,15 @@ namespace ceLib
 		}
 	}
 
-	bool Dsp::memTranslateAddress(dsp56k::EMemArea& _area, dsp56k::TWord& _offset) const
+	void Dsp::memTranslateAddress(dsp56k::EMemArea& _area, dsp56k::TWord& _offset) const
 	{
-		if(_offset >= 0x400000)
-		{
-			_area = dsp56k::MemArea_X;
-			return true;
-		}
-		return false;
+//		if(_offset >= 0x400000)
+//			_area = dsp56k::MemArea_X;
+
+		// It's magic...
+		auto o = static_cast<int32_t>(_offset - 0x400000);
+		o >>= 24;
+		_area = static_cast<dsp56k::EMemArea>(_area & o);
 	}
 
 	bool Dsp::memValidateAccess(dsp56k::EMemArea _area, dsp56k::TWord _addr, bool _write) const
