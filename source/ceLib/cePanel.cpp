@@ -65,6 +65,8 @@ namespace ceLib
 	Panel::Panel()
 	{
 		m_parameterValues.resize(g_paramCount, 0.0f);
+
+		setParameter(0, 0.5f);
 	}
 
 	void Panel::destroy()
