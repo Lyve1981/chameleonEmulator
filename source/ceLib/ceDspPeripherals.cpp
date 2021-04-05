@@ -40,8 +40,7 @@ namespace ceLib
 			if(m_audioInput.empty())
 				return 0;
 
-			const auto res = m_audioInput.front();
-			m_audioInput.pop_front();
+			const auto res = m_audioInput.pop_front();
 
 			return res;
 		}
@@ -101,14 +100,12 @@ namespace ceLib
 		if(!_sampleFrames)
 			return;
 
-		auto& essi = m_dsp->getEssi();;
-
 		// write input data
 		for(size_t i=0; i<_sampleFrames; ++i)
 		{
 			for(size_t c=0; c<2; ++c)
 			{
-				m_audioInput.push_back(float_to_fix(_inputs[c][i]) & 0x00ffffff);
+				m_audioInput.push_back(dsp56k::Essi::float2Dsdp(_inputs[c][i]));
 			}
 		}
 
@@ -117,13 +114,9 @@ namespace ceLib
 		{
 			for(size_t c=0; c<2; ++c)
 			{
-				while(m_audioOutput.empty())
-					std::this_thread::yield();
+				const auto v = m_audioOutput.pop_front();
 
-				const auto v = m_audioOutput.front();
-				m_audioOutput.pop_front();
-
-				_outputs[c][i] = fix_to_float(v);
+				_outputs[c][i] = dsp56k::Essi::dsp2Float(v);
 			}
 		}
 	}
@@ -135,9 +128,6 @@ namespace ceLib
 
 		for(size_t i=0; i<_count; ++i)
 		{
-			while(m_hi8data.full())
-				std::this_thread::yield();
-
 			m_hi8data.push_back(_data[i] & 0x00ffffff);
 		}
 
