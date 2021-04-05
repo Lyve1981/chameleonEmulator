@@ -23,7 +23,7 @@ namespace ceLib
 	{
 	public:
 		void initialize(dsp56k::DSP& _dsp);
-		void process(std::mutex& _dspLock, float** _inputs, float** _outputs, size_t _sampleFrames);
+		void process(float** _inputs, float** _outputs, size_t _sampleFrames);
 		void writeData(const int32_t* _data, size_t _count);
 
 	private:

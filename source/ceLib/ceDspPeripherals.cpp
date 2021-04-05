@@ -96,7 +96,7 @@ namespace ceLib
 		essi.setControlRegisters(dsp56k::Essi::Essi0, cra, crb);
 	}
 
-	void DspPeripherals::process(std::mutex& _dspLock, float** _inputs, float** _outputs, size_t _sampleFrames)
+	void DspPeripherals::process(float** _inputs, float** _outputs, size_t _sampleFrames)
 	{
 		if(!_sampleFrames)
 			return;
