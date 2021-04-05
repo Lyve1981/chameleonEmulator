@@ -12,6 +12,8 @@ template<typename T, size_t C> class RingBuffer
 public:
 	RingBuffer() : m_insertPos(0), m_removePos(0), m_usage(0), m_readSem(0), m_writeSem(C)
 	{
+		static_assert(C>0, "C needs to be greater than 1");
+		static_assert((C&(C-1)) == 0, "C needs to be power of two");
 	}
 
 	size_t capacity() const		{ return C; }
@@ -39,7 +41,7 @@ public:
 	{
 		m_readSem.wait();
 
-		const T res = front();
+		T res = front();
 //		assert( m_usage > 0 && "ring buffer is already empty!" );
 
 		updateCounter(m_removePos);
@@ -95,8 +97,8 @@ public:
 private:
 	static void updateCounter( size_t& _counter )
 	{
-		if( (++_counter) == C )
-			_counter = 0;
+		++_counter;
+		_counter &= C-1;
 	}
 
 	T& get( size_t i )
@@ -110,8 +112,7 @@ private:
 	{
 		_i += m_removePos;
 
-		if( _i >= C )
-			_i -= C;
+		_i &= C-1;
 	}
 
 	std::array<T,C>		m_data;
