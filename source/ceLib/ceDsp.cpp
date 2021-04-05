@@ -203,11 +203,11 @@ namespace ceLib
 
 				const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(d);
 
-				const auto ips = ipsStep * 1000 / ms.count();
+				const auto ips = ipsStep / ms.count();
 
 				t = t2;
 
-				LOG("IPS: " << ips);
+				LOG("IPS: " << ips << "k");
 			}
 		}
 	}
