@@ -1,37 +1,11 @@
 #include "ceDspPeripherals.h"
 
-#include "ceDsp.h"
-#include "rtems.h"
-#include "chameleon.h"
-
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 
 namespace ceLib
 {
-	bool DspPeripherals::isValidAddress(dsp56k::TWord _addr) const
+	void DspPeripherals::initialize()
 	{
-		return PeripheralsDefault::isValidAddress(_addr);
-	}
-
-	dsp56k::TWord DspPeripherals::read(dsp56k::TWord _addr)
-	{
-		return PeripheralsDefault::read(_addr);
-	}
-
-	void DspPeripherals::write(const dsp56k::TWord _addr, dsp56k::TWord _value)
-	{
-		PeripheralsDefault::write(_addr, _value);
-	}
-
-	void DspPeripherals::exec()
-	{
-		PeripheralsDefault::exec();
-	}
-
-	void DspPeripherals::initialize(dsp56k::DSP& _dsp)
-	{
-		m_dsp = &_dsp;
-
 		auto& essi = getEssi();
 
 		const dsp56k::TWord cra =	dsp56k::Essi::CRA_WL0 | dsp56k::Essi::CRA_WL1;	// word length 24 bits

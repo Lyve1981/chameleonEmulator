@@ -96,7 +96,7 @@ namespace ceLib
 		m_memory.reset(new dsp56k::Memory(this, g_memorySize));
 		m_dsp.reset(new dsp56k::DSP(*m_memory, m_peripherals.get(), m_peripherals.get()));
 
-		m_peripherals->initialize(*m_dsp);
+		m_peripherals->initialize();
 
 		return true;
 	}
