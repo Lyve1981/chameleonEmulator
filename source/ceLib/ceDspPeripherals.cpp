@@ -8,8 +8,6 @@
 
 namespace ceLib
 {
-	constexpr uint32_t HSR_HRDF = 0;			// Host Status Register Bit: Receive Data Full
-
 	bool DspPeripherals::isValidAddress(dsp56k::TWord _addr) const
 	{
 		return PeripheralsDefault::isValidAddress(_addr);
@@ -17,22 +15,6 @@ namespace ceLib
 
 	dsp56k::TWord DspPeripherals::read(dsp56k::TWord _addr)
 	{
-		if(_addr == dsp56k::HostIO_HRX)	// Host Receive Register (HRX)
-		{
-			if(m_hi8data.empty())
-				return PeripheralsDefault::read(_addr);
-
-			const auto res = m_hi8data.front();
-			write(dsp56k::HostIO_HRX, res);
-
-			m_hi8data.pop_front();
-
-			if(m_hi8data.empty())
-				write(dsp56k::HostIO_HSR, read(dsp56k::HostIO_HSR) & ~(1<<HSR_HRDF));	// Clear "Receive Data Full" bit
-
-			return res;
-		}
-
 		if(_addr == dsp56k::Essi::ESSI0_RX)
 		{
 			assert(m_dsp);
@@ -50,7 +32,7 @@ namespace ceLib
 		return res;
 	}
 
-	void DspPeripherals::write(dsp56k::TWord _addr, dsp56k::TWord _value)
+	void DspPeripherals::write(const dsp56k::TWord _addr, dsp56k::TWord _value)
 	{
 		PeripheralsDefault::write(_addr, _value);
 
@@ -77,6 +59,8 @@ namespace ceLib
 
 		// Toggle Frame Sync flag. We do not need it as we ensure proper channel ordering anyway, but the DSP needs it to sync to the left/right channel
 		essi.toggleStatusRegisterBit(dsp56k::Essi::Essi0, dsp56k::Essi::SSISR_RFS, (++m_frameSync)&1);
+
+		PeripheralsDefault::exec();
 	}
 
 	void DspPeripherals::initialize(dsp56k::DSP& _dsp)
@@ -119,18 +103,5 @@ namespace ceLib
 				_outputs[c][i] = dsp56k::Essi::dsp2Float(v);
 			}
 		}
-	}
-
-	void DspPeripherals::writeData(const int32_t* _data, size_t _count)
-	{
-		if(_count == 0)
-			return;
-
-		for(size_t i=0; i<_count; ++i)
-		{
-			m_hi8data.push_back(_data[i] & 0x00ffffff);
-		}
-
-		write(dsp56k::HostIO_HSR, read(dsp56k::HostIO_HSR) | (1<<HSR_HRDF));	// Set "Receive Data Full" bit
 	}
 }

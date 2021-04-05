@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "semaphore.h"
+#include "../dsp56300/source/dsp56kEmu/semaphore.h"
 
 namespace ceLib
 {

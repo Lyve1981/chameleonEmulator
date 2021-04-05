@@ -80,7 +80,7 @@ namespace ceLib
 	bool Dsp::writeData(int _ref, const int32_t* _data, size_t _count)
 	{
 		Guard g(m_lock);
-		m_peripherals->writeData(_data, _count);
+		m_peripherals->writeHI8Data(_data, _count);
 		return true;
 	}
 

@@ -1,9 +1,6 @@
 #pragma once
 
-#include <mutex>
-
-#include "ringbuffer.h"
-
+#include "../dsp56300/source/dsp56kEmu/ringbuffer.h"
 #include "../dsp56300/source/dsp56kEmu/peripherals.h"
 
 namespace std
@@ -24,7 +21,6 @@ namespace ceLib
 	public:
 		void initialize(dsp56k::DSP& _dsp);
 		void process(float** _inputs, float** _outputs, size_t _sampleFrames);
-		void writeData(const int32_t* _data, size_t _count);
 
 	private:
 		bool isValidAddress( dsp56k::TWord _addr ) const override;
@@ -33,8 +29,6 @@ namespace ceLib
 		void exec() override;
 
 		dsp56k::DSP* m_dsp = nullptr;
-
-		RingBuffer<uint32_t, 1024> m_hi8data;
 
 		RingBuffer<uint32_t, 8192> m_audioInput;
 		RingBuffer<uint32_t, 8192> m_audioOutput;
