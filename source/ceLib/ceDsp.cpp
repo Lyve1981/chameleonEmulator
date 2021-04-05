@@ -87,14 +87,14 @@ namespace ceLib
 	void Dsp::process(float** _inputs, float** _outputs, size_t _sampleFrames)
 	{
 		if(m_runnerThread)
-			m_peripherals->process(_inputs, _outputs, _sampleFrames);
+			m_peripherals->getEssi().processAudioInterleavedTX0(_inputs, _outputs, _sampleFrames);
 	}
 
 	bool Dsp::createDSP()
 	{
 		m_peripherals.reset(new DspPeripherals());
-		m_memory.reset(new dsp56k::Memory(m_peripherals.get(), m_peripherals.get(), this, g_memorySize));
-		m_dsp.reset(new dsp56k::DSP(*m_memory));
+		m_memory.reset(new dsp56k::Memory(this, g_memorySize));
+		m_dsp.reset(new dsp56k::DSP(*m_memory, m_peripherals.get(), m_peripherals.get()));
 
 		m_peripherals->initialize(*m_dsp);
 
