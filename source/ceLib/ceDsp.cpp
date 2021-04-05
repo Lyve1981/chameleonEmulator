@@ -79,7 +79,9 @@ namespace ceLib
 
 	bool Dsp::writeData(int _ref, const int32_t* _data, size_t _count)
 	{
-		Guard g(m_lock);
+		if(_ref != g_dspId)
+			return false;
+
 		m_peripherals->writeHI8Data(_data, _count);
 		return true;
 	}
