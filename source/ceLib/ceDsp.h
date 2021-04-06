@@ -11,7 +11,7 @@
 
 namespace ceLib
 {
-	class Dsp : dsp56k::IMemoryMap
+	class Dsp final : dsp56k::IMemoryMap
 	{
 	public:
 		using Guard = std::lock_guard<std::mutex>;
