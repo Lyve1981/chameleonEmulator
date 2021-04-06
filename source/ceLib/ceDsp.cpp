@@ -95,7 +95,7 @@ namespace ceLib
 	bool Dsp::createDSP()
 	{
 		m_peripherals.reset(new DspPeripherals());
-		m_memory.reset(new dsp56k::Memory(this, g_memorySize));
+		m_memory.reset(new dsp56k::Memory(*this, g_memorySize));
 		m_dsp.reset(new dsp56k::DSP(*m_memory, m_peripherals.get(), m_peripherals.get()));
 
 		m_peripherals->initialize();
@@ -182,14 +182,14 @@ namespace ceLib
 
 		auto t = clock::now();
 
-		const size_t ipsStep = 0x400000;
+		const size_t ipsStep = 0x800000;
 
 		while(m_runThread)
 		{
 			{
 				Guard g(m_lock);
 
-				for(size_t i=0; i<64; ++i)
+				for(size_t i=0; i<128; ++i)
 				{
 					m_dsp->exec();
 
