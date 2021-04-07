@@ -182,7 +182,7 @@ namespace ceLib
 
 		auto t = clock::now();
 
-		const size_t ipsStep = 0x1000000;
+		const size_t ipsStep = 0x4000000;
 
 		while(m_runThread)
 		{
