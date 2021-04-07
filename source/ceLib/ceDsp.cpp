@@ -182,19 +182,26 @@ namespace ceLib
 
 		auto t = clock::now();
 
-		const size_t ipsStep = 0x800000;
+		const size_t ipsStep = 0x1000000;
 
 		while(m_runThread)
 		{
 			{
 				Guard g(m_lock);
 
-				for(size_t i=0; i<128; ++i)
+				for(size_t i=0; i<128; i += 8)
 				{
 					m_dsp->exec();
-
-					++instructions;
+					m_dsp->exec();
+					m_dsp->exec();
+					m_dsp->exec();
+					m_dsp->exec();
+					m_dsp->exec();
+					m_dsp->exec();
+					m_dsp->exec();
 				}
+
+				instructions += 128;
 			}
 
 			if((instructions & (ipsStep-1)) == 0)
