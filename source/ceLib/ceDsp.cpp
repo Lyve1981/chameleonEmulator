@@ -125,7 +125,7 @@ namespace ceLib
 		auto* bufMem = bufDSP + alignedSize<dsp56k::DSP>();
 		auto* bufBuf = bufMem + alignedSize<dsp56k::Memory>();
 		
-		m_memory = new (bufMem)dsp56k::Memory(*this, g_memorySize, bufBuf);
+		m_memory = new (bufMem)dsp56k::Memory(*this, g_memorySize, reinterpret_cast<dsp56k::TWord*>(bufBuf));
 		m_dsp = new (buf)dsp56k::DSP(*m_memory, m_peripherals.get(), m_peripherals.get());
 
 		m_memory->setExternalMemory(0x400000, true);
