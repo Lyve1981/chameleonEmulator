@@ -11,7 +11,7 @@
 
 namespace ceLib
 {
-	class Dsp final : dsp56k::IMemoryMap
+	class Dsp final : dsp56k::IMemoryValidator
 	{
 	public:
 		using Guard = std::lock_guard<std::mutex>;
@@ -31,17 +31,17 @@ namespace ceLib
 
 		void destroyThread();
 
-		void memTranslateAddress(dsp56k::EMemArea& _area, dsp56k::TWord& _offset ) const override;
 		bool memValidateAccess	(dsp56k::EMemArea _area, dsp56k::TWord _addr, bool _write ) const override ;
 
 		void threadFunc();
 
 		std::unique_ptr<DspPeripherals> m_peripherals;
-		std::unique_ptr<dsp56k::Memory> m_memory;
-		std::unique_ptr<dsp56k::DSP> m_dsp;
+		dsp56k::Memory* m_memory;
+		dsp56k::DSP* m_dsp;
 
 		std::atomic<bool> m_runThread;
 		std::unique_ptr<std::thread> m_runnerThread;
 		std::mutex m_lock;
+		std::vector<uint8_t> m_buffer;
 	};
 }

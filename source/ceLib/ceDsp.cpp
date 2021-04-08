@@ -9,17 +9,39 @@
 
 namespace ceLib
 {
-	constexpr size_t g_memorySize = 0x800000;
+	constexpr size_t g_memorySize		= 0x800000;
+	constexpr uint8_t g_cmdMemoryP		= 0x00;
+	constexpr uint8_t g_cmdMemoryX		= 0x01;
+	constexpr uint8_t g_cmdMemoryY		= 0x02;
+	constexpr uint8_t g_cmEnd			= 0x03;
 
-	constexpr uint8_t g_cmdMemoryP	= 0x00;
-	constexpr uint8_t g_cmdMemoryX	= 0x01;
-	constexpr uint8_t g_cmdMemoryY	= 0x02;
-	constexpr uint8_t g_cmEnd		= 0x03;
+	constexpr uint32_t g_dspId			= 1;
 
-	constexpr uint32_t g_dspId		= 1;
+	constexpr size_t g_cacheLineSize	= 128;
 
-	Dsp::Dsp() : m_runThread(false)
+	constexpr size_t alignedSize(size_t _size)
 	{
+		return (_size + g_cacheLineSize - 1) / g_cacheLineSize * g_cacheLineSize;
+	}
+
+	template<typename T>
+	T* alignedAddress(T* _ptr)
+	{
+		static_assert(sizeof(size_t) == sizeof(T*), "pointer size invalid");
+		const auto addr = reinterpret_cast<size_t>(_ptr);
+		return reinterpret_cast<T*>((addr + g_cacheLineSize - 1) / g_cacheLineSize * g_cacheLineSize);
+	}
+
+	template<typename T> constexpr size_t alignedSize()
+	{
+		return alignedSize(sizeof(T));
+	}
+	
+	constexpr size_t g_requiredMemSize	= alignedSize<dsp56k::DSP>() + alignedSize<dsp56k::Memory>() + g_memorySize * dsp56k::MemArea_COUNT * sizeof(uint32_t);
+
+	Dsp::Dsp() : m_dsp(nullptr), m_memory(nullptr), m_runThread(false)
+	{
+		m_buffer.resize(alignedSize(g_requiredMemSize));
 	}
 	Dsp::~Dsp()
 	{
@@ -95,8 +117,18 @@ namespace ceLib
 	bool Dsp::createDSP()
 	{
 		m_peripherals.reset(new DspPeripherals());
-		m_memory.reset(new dsp56k::Memory(*this, g_memorySize));
-		m_dsp.reset(new dsp56k::DSP(*m_memory, m_peripherals.get(), m_peripherals.get()));
+
+		auto* buf = &m_buffer[0];
+		buf = alignedAddress(buf);
+
+		auto* bufDSP = buf;
+		auto* bufMem = bufDSP + alignedSize<dsp56k::DSP>();
+		auto* bufBuf = bufMem + alignedSize<dsp56k::Memory>();
+		
+		m_memory = new (bufMem)dsp56k::Memory(*this, g_memorySize, bufBuf);
+		m_dsp = new (buf)dsp56k::DSP(*m_memory, m_peripherals.get(), m_peripherals.get());
+
+		m_memory->setExternalMemory(0x400000, true);
 
 		m_peripherals->initialize();
 
@@ -108,9 +140,11 @@ namespace ceLib
 		if(!m_dsp)
 			return false;
 
-		m_dsp.reset();
-		m_memory.reset();
+		m_dsp->~DSP();
+		m_memory->~Memory();
 		m_peripherals.reset();
+		m_dsp = nullptr;
+		m_memory = nullptr;
 
 		return true;
 	}
@@ -151,17 +185,6 @@ namespace ceLib
 			default:			LOG("Invalid command " << static_cast<int>(type));		return false;
 			}
 		}
-	}
-
-	void Dsp::memTranslateAddress(dsp56k::EMemArea& _area, dsp56k::TWord& _offset) const
-	{
-//		if(_offset >= 0x400000)
-//			_area = dsp56k::MemArea_X;
-
-		// It's magic...
-		auto o = static_cast<int32_t>(_offset - 0x400000);
-		o >>= 24;
-		_area = static_cast<dsp56k::EMemArea>(_area & o);
 	}
 
 	bool Dsp::memValidateAccess(dsp56k::EMemArea _area, dsp56k::TWord _addr, bool _write) const
