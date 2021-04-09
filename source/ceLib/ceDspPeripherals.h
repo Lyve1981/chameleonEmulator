@@ -4,7 +4,7 @@
 
 namespace ceLib
 {
-	class DspPeripherals final : public dsp56k::PeripheralsDefault
+	class DspPeripherals final : public dsp56k::Peripherals56303
 	{
 	public:
 		void initialize();

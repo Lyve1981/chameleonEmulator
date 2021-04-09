@@ -104,7 +104,7 @@ namespace ceLib
 		if(_ref != g_dspId)
 			return false;
 
-		m_peripherals->writeHI8Data(_data, _count);
+		m_peripherals->getHI08().write(_data, _count);
 		return true;
 	}
 
