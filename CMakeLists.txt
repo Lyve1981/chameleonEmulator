@@ -15,10 +15,14 @@ add_definitions("-DDEBUG")
 add_subdirectory(source/pluginVST2)
 add_subdirectory(source/vstsdk2.4.2)
 add_subdirectory(source/ceLib)
-add_subdirectory(source/cExamples/dspthru)
 add_subdirectory(source/dsp56300/source)
 
-# ----------------- plugins
+# Chameleon Examples
+add_subdirectory(source/cExamples/dspthru)
+add_subdirectory(source/cExamples/hostcommands)
+
+set(example cExampleDspthru)
+#set(example cExampleHostcommands)
 
 # ----------------- VST2 Plugin
 
@@ -32,7 +36,7 @@ endif()
 
 target_include_directories(chameleonEmuVST2 PRIVATE source/vstsdk2.4.2/)
 
-target_link_libraries(chameleonEmuVST2 cePluginVST2 cExampleDspthru)
+target_link_libraries(chameleonEmuVST2 cePluginVST2 ${example})
 
 if(APPLE OR UNIX)
 	target_link_libraries(chameleonEmuVST2 ${OS_LINK_LIBRARIES})
