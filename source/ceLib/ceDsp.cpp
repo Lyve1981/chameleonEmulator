@@ -7,6 +7,8 @@
 
 #include <chrono>
 
+#include "../dsp56300/source/dsp56kEmu/unittests.h"
+
 namespace ceLib
 {
 	constexpr size_t g_memorySize		= 0x800000;
@@ -41,6 +43,7 @@ namespace ceLib
 
 	Dsp::Dsp() : m_dsp(nullptr), m_memory(nullptr), m_runThread(false)
 	{
+		dsp56k::UnitTests tests;
 		m_buffer.resize(alignedSize(g_requiredMemSize));
 	}
 	Dsp::~Dsp()
