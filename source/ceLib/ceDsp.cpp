@@ -205,17 +205,23 @@ namespace ceLib
 		}
 
 		size_t instructions = 0;
+		size_t counter = 0;
 
-		using clock = std::chrono::high_resolution_clock;
+		using Clock = std::chrono::high_resolution_clock;
 
-		auto t = clock::now();
+		auto t = Clock::now();
 
+#ifdef _DEBUG
+		const size_t ipsStep = 0x0010000;
+#else
 		const size_t ipsStep = 0x4000000;
-
+#endif
 		while(m_runThread)
 		{
 			{
 				Guard g(m_lock);
+
+				const auto iBegin = m_dsp->getInstructionCounter();
 
 				for(size_t i=0; i<128; i += 8)
 				{
@@ -229,18 +235,20 @@ namespace ceLib
 					m_dsp->exec();
 				}
 
-				instructions += 128;
+				instructions += m_dsp->getInstructionCounter() - iBegin;
+				counter += 128;
 			}
 
-			if((instructions & (ipsStep-1)) == 0)
+			if((counter & (ipsStep-1)) == 0)
 			{
-				const auto t2 = clock::now();
+				const auto t2 = Clock::now();
 				const auto d = t2 - t;
 
 				const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(d);
 
-				const auto ips = ipsStep / ms.count();
+				const auto ips = instructions / ms.count();
 
+				instructions = 0;
 				t = t2;
 
 				LOG("IPS: " << ips << "k");
