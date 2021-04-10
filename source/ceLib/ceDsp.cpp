@@ -142,10 +142,12 @@ namespace ceLib
 
 		m_dsp->~DSP();
 		m_memory->~Memory();
-		m_peripherals.reset();
+
 		m_dsp = nullptr;
 		m_memory = nullptr;
 
+		m_peripherals.reset();
+		
 		return true;
 	}
 
