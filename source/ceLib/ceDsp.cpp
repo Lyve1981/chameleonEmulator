@@ -41,7 +41,7 @@ namespace ceLib
 	
 	constexpr size_t g_requiredMemSize	= alignedSize<dsp56k::DSP>() + alignedSize<dsp56k::Memory>() + g_memorySize * dsp56k::MemArea_COUNT * sizeof(uint32_t);
 
-	Dsp::Dsp() : m_dsp(nullptr), m_memory(nullptr), m_runThread(false)
+	Dsp::Dsp() : m_dsp(nullptr), m_memory(nullptr)
 	{
 		dsp56k::UnitTests tests;
 		m_buffer.resize(alignedSize(g_requiredMemSize));
@@ -57,8 +57,6 @@ namespace ceLib
 		if(_dspIndex != g_dspId)
 			return 0;
 
-		Guard g(m_lock);
-
 		if(m_dsp)
 			return 0;
 
@@ -71,11 +69,9 @@ namespace ceLib
 			return 0;			
 		}
 
-		m_runThread = true;
-		m_runnerThread.reset(new std::thread([this]
-		{
-			threadFunc();
-		}));
+		m_dsp->setPC(0x100);
+
+		m_runnerThread.reset(new dsp56k::DSPThread(*m_dsp));
 
 		return _dspIndex;
 	}
@@ -83,12 +79,7 @@ namespace ceLib
 	void Dsp::destroyThread()
 	{
 		if(m_runnerThread)
-		{
-			m_runThread = false;
-
-			Guard g(m_lock);
-			m_runnerThread->join();
-		}
+			m_runnerThread.reset();
 	}
 
 	bool Dsp::destroy(int _ref)
@@ -195,65 +186,6 @@ namespace ceLib
 	bool Dsp::memValidateAccess(dsp56k::EMemArea _area, dsp56k::TWord _addr, bool _write) const
 	{
 		return true;
-	}
-
-	void Dsp::threadFunc()
-	{
-		{
-			Guard g(m_lock);
-			m_dsp->setPC(0x100);
-		}
-
-		size_t instructions = 0;
-		size_t counter = 0;
-
-		using Clock = std::chrono::high_resolution_clock;
-
-		auto t = Clock::now();
-
-#ifdef _DEBUG
-		const size_t ipsStep = 0x0010000;
-#else
-		const size_t ipsStep = 0x4000000;
-#endif
-		while(m_runThread)
-		{
-			{
-				Guard g(m_lock);
-
-				const auto iBegin = m_dsp->getInstructionCounter();
-
-				for(size_t i=0; i<128; i += 8)
-				{
-					m_dsp->exec();
-					m_dsp->exec();
-					m_dsp->exec();
-					m_dsp->exec();
-					m_dsp->exec();
-					m_dsp->exec();
-					m_dsp->exec();
-					m_dsp->exec();
-				}
-
-				instructions += m_dsp->getInstructionCounter() - iBegin;
-				counter += 128;
-			}
-
-			if((counter & (ipsStep-1)) == 0)
-			{
-				const auto t2 = Clock::now();
-				const auto d = t2 - t;
-
-				const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(d);
-
-				const auto ips = instructions / ms.count();
-
-				instructions = 0;
-				t = t2;
-
-				LOG("IPS: " << ips << "k");
-			}
-		}
 	}
 }
 

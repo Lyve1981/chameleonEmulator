@@ -1,13 +1,13 @@
 #pragma once
 
-#include <atomic>
 #include <cstdint>
 #include <mutex>
-#include <thread>
 
 #include "ceDspPeripherals.h"
+
 #include "../dsp56300/source/dsp56kEmu/memory.h"
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
+#include "../dsp56300/source/dsp56kEmu/dspthread.h"
 
 namespace ceLib
 {
@@ -33,14 +33,11 @@ namespace ceLib
 
 		bool memValidateAccess	(dsp56k::EMemArea _area, dsp56k::TWord _addr, bool _write ) const override ;
 
-		void threadFunc();
-
 		std::unique_ptr<DspPeripherals> m_peripherals;
 		dsp56k::Memory* m_memory;
 		dsp56k::DSP* m_dsp;
+		std::unique_ptr<dsp56k::DSPThread> m_runnerThread;
 
-		std::atomic<bool> m_runThread;
-		std::unique_ptr<std::thread> m_runnerThread;
 		std::mutex m_lock;
 		std::vector<uint8_t> m_buffer;
 	};
